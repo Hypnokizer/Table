@@ -11,7 +11,6 @@
 */
 
 /*
-@TODO break table array into 3 arrays: thead, tfoot, tbody
 @TODO single method attr() returns array and stores it in the appropriate place
 
 */
@@ -33,11 +32,8 @@ class Table {
 	protected $section;
 	protected $caption;
 	protected $thead;
-	protected $theadattr;
 	protected $tfoot;
-	protected $tfootattr;
 	protected $tbody;
-	protected $tbodyattr;
 
 
 	/**
@@ -88,13 +84,8 @@ class Table {
 		);
 
 		$this->thead = array();
-		$this->theadattr = array();
-
 		$this->tfoot = array();
-		$this->tfootattr = array();
-
 		$this->tbody = array();
-		$this->tbodyattr = array();
 	}
 
 
@@ -169,15 +160,15 @@ class Table {
 	public function rowAttr($key, $val) {
 		switch($this->section) {
 			case 'thead':
-				$this->theadattr[$key] = $val;
+				$this->thead[$this->rowcounter]['attr'][$key] = $val;
 				break;
 
 			case 'tfoot':
-				$this->tfootattr[$key] = $val;
+				$this->tfoot[$this->rowcounter]['attr'][$key] = $val;
 				break;
 
 			case 'tbody':
-				$this->tbodyattr[$key] = $val;
+				$this->tbody[$this->rowcounter]['attr'][$key] = $val;
 				break;
 		}
 
@@ -254,30 +245,6 @@ class Table {
 	/**
 	* create attributes from array of key value pairs
 	*/
-	// protected function createAttributes($array) {
-	// 	$attr = array();
-
-	// 	// create attribute array (except for content)
-	// 	foreach($array as $key => $val) {
-	// 		if($key != 'content') {
-	// 			$attr[] = $key . '="' . $val . '"';
-	// 		}
-	// 	}
-
-	// 	// create string of attributes
-	// 	$string = implode(' ', $attr);
-
-	// 	// add a leading space to attribute string
-	// 	if(strlen($string) > 0 ) {
-	// 		$string = ' ' . $string;
-	// 	}
-
-	// 	return $string;
-	// }
-
-
-
-
 	// @TODO finish this
 	// @TODO account for boolean values
 	protected function createAttributes($array) {
@@ -338,7 +305,6 @@ class Table {
 		}
 
 
-
 		/**
 		* create THEAD if present
 		*/
@@ -350,13 +316,7 @@ class Table {
 				// begin table row
 				$string .= '<tr';
 
-				// @TODO finish
-				// add attributes if present
-				// if(!empty($row['attr'])) {
-				// 	$string .= $this->createAttributes($row['attr']);
-				// }
-
-				$string .= $this->createAttributes($this->theadattr);
+				$string .= $this->createAttributes($row['attr']);
 
 				$string .= '>';
 
@@ -389,12 +349,7 @@ class Table {
 			// begin table row
 			$string .= '<tr';
 
-			$string .= $this->createAttributes($row);
-
-			// add attributes if present
-			// if(!empty($row['attr'])) {
-			// 	$string .= $this->createAttributes($row['attr']);
-			// }
+			$string .= $this->createAttributes($row['attr']);
 
 			$string .= '>';
 
@@ -421,18 +376,15 @@ class Table {
 		/**
 		* create TFOOT if present
 		*/
-		if(!empty($this->table['tfoot'])) {
+		if(!empty($this->tfoot)) {
 			$string .= '<tfoot>' . PHP_EOL;
 
 			// step thru table header rows
-			foreach($this->table['tfoot'] as $row) {
+			foreach($this->tfoot as $row) {
 				// begin table row
 				$string .= '<tr';
 
-				// add attributes if present
-				if(!empty($row['attr'])) {
-					$string .= $this->createAttributes($row['attr']);
-				}
+				$string .= $this->createAttributes($row['attr']);
 
 				$string .= '>';
 
