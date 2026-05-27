@@ -13,7 +13,8 @@ th, td {
 
 require_once('Table.php');
 
-use App\Controllers\Table;
+// use App\Controllers\Table;
+use Hypnokizer\Table;
 
 $t = new table('table table-striped');
 
