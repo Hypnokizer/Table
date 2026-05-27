@@ -10,6 +10,12 @@
 * @revision 2015-01-20 The entire class was rewritten to put all values into one TABLE array. Multiple header and footer rows are now possible.
 */
 
+/*
+@TODO break table array into 3 arrays: thead, tfoot, tbody
+@TODO single method attr() returns array and stores it in the appropriate place
+
+*/
+
 namespace App\Controllers;
 
 class Table {
@@ -25,6 +31,13 @@ class Table {
 	protected $rowcounter;
 	protected $cellcounter;
 	protected $section;
+	protected $caption;
+	protected $thead;
+	protected $theadattr;
+	protected $tfoot;
+	protected $tfootattr;
+	protected $tbody;
+	protected $tbodyattr;
 
 
 	/**
@@ -68,27 +81,32 @@ class Table {
 		$this->cellcounter = 0;
 		$this->section = 'tbody';
 
+		$this->caption = NULL;
 
 		$this->table = array(
-			'attr' => array(
-				'class' => $classname
-			),
-			'caption' => NULL,
-			'thead' => array(),
-			'tfoot' => array(),
-			'tbody' => array()
+			'class' => $classname
 		);
+
+		$this->thead = array();
+		$this->theadattr = array();
+
+		$this->tfoot = array();
+		$this->tfootattr = array();
+
+		$this->tbody = array();
+		$this->tbodyattr = array();
 	}
 
 
 
 
+	public function tableAttr($key, $val) {
 
+		$this->table[$key] = $val;
 
-
-	public function setTableAttr($key, $val) {
-		$this->table['attr'][$key] = $val;
+        return $this;
 	}
+
 
 
 
@@ -100,8 +118,11 @@ class Table {
 	* @access public
 	* @param string $text The caption string for the table
 	*/
-	public function setCaption($text = NULL) {
-		$this->table['caption'] = $text;
+	public function caption($text) {
+
+		$this->caption = $text;
+
+		return $this;
 	}
 
 
@@ -121,14 +142,14 @@ class Table {
 	* @see setCell()
 	* @see addFooterRow()
 	*/
-	public function addRow($section = 'tbody') {
+	public function row($section = 'tbody') {
 		// reset the cell counter
 		$this->cellcounter = 0;
 
 		// increment the row counter
 		$this->rowcounter++;
 
-		// define allowed values for the table section
+		// define allowed values for the table sections
 		$allowed = array('thead', 'tfoot', 'tbody');
 
 		if(in_array($section, $allowed)) {
@@ -137,13 +158,32 @@ class Table {
 		else {
 			$this->section = 'tbody';
 		}
+
+		return $this;
 	}
 
 
 
-	public function setRowAttr($key, $val) {
-		$this->table[$this->section][$this->rowcounter]['attr'][$key] = $val;
+
+
+	public function rowAttr($key, $val) {
+		switch($this->section) {
+			case 'thead':
+				$this->theadattr[$key] = $val;
+				break;
+
+			case 'tfoot':
+				$this->tfootattr[$key] = $val;
+				break;
+
+			case 'tbody':
+				$this->tbodyattr[$key] = $val;
+				break;
+		}
+
+		return $this;
 	}
+
 
 
 
@@ -160,21 +200,52 @@ class Table {
 	* @param string $class Text to be used as the CSS class name
 	* @param int $colspan The number of columns the cell should span
 	*/
-	public function setCell($content = '&nbsp;') {
-	    // increment the cell counter
+
+	public function cell($content = '&nbsp;') {
+		// increment the cell counter
 		$this->cellcounter++;
 
-		$this->table[$this->section][$this->rowcounter][$this->cellcounter]['content'] = $content;
+		switch($this->section) {
+			case 'thead':
+				$this->thead[$this->rowcounter][$this->cellcounter]['content'] = $content;
+				break;
+
+			case 'tfoot':
+				$this->tfoot[$this->rowcounter][$this->cellcounter]['content'] = $content;
+				break;
+
+			case 'tbody':
+				$this->tbody[$this->rowcounter][$this->cellcounter]['content'] = $content;
+				break;
+		}
+
+		return $this;
 	}
 
 
 
-	public function setAttr($key, $val) {
-		$this->table[$this->section][$this->rowcounter][$this->cellcounter][$key] = $val;
+
+
+
+
+	public function attr($key, $val) {
+
+		switch($this->section) {
+			case 'thead':
+				$this->thead[$this->rowcounter][$this->cellcounter][$key] = $val;
+				break;
+
+			case 'tfoot':
+				$this->tfoot[$this->rowcounter][$this->cellcounter][$key] = $val;
+				break;
+
+			case 'tbody':
+				$this->tbody[$this->rowcounter][$this->cellcounter][$key] = $val;
+				break;
+		}
+
+        return $this;
 	}
-
-
-
 
 
 
@@ -183,6 +254,32 @@ class Table {
 	/**
 	* create attributes from array of key value pairs
 	*/
+	// protected function createAttributes($array) {
+	// 	$attr = array();
+
+	// 	// create attribute array (except for content)
+	// 	foreach($array as $key => $val) {
+	// 		if($key != 'content') {
+	// 			$attr[] = $key . '="' . $val . '"';
+	// 		}
+	// 	}
+
+	// 	// create string of attributes
+	// 	$string = implode(' ', $attr);
+
+	// 	// add a leading space to attribute string
+	// 	if(strlen($string) > 0 ) {
+	// 		$string = ' ' . $string;
+	// 	}
+
+	// 	return $string;
+	// }
+
+
+
+
+	// @TODO finish this
+	// @TODO account for boolean values
 	protected function createAttributes($array) {
 		$attr = array();
 
@@ -197,15 +294,12 @@ class Table {
 		$string = implode(' ', $attr);
 
 		// add a leading space to attribute string
-		if(strlen($string) > 0 ) {
+		if(strlen($string) > 0) {
 			$string = ' ' . $string;
 		}
 
 		return $string;
 	}
-
-
-
 
 
 
@@ -227,19 +321,20 @@ class Table {
 	* @access public
 	* @return string
 	*/
+	// @TODO rework this
 	public function createTable($displaytable = true) {
 		// open the table tag
 		$string = '<table';
 
 		// create table attributes
-		$string .= $this->createAttributes($this->table['attr']);
+		$string .= $this->createAttributes($this->table);
 
         // close the table tag
 		$string .= '>' . PHP_EOL;
 
         // show the caption if present
-		if(!empty($this->table['caption'])) {
-			$string .= '<caption>' . $this->table['caption'] . '</caption>' . PHP_EOL;
+		if(!empty($this->caption)) {
+			$string .= '<caption>' . $this->caption . '</caption>' . PHP_EOL;
 		}
 
 
@@ -247,18 +342,21 @@ class Table {
 		/**
 		* create THEAD if present
 		*/
-		if(!empty($this->table['thead'])) {
+		if(!empty($this->thead)) {
 			$string .= '<thead>' . PHP_EOL;
 
 			// step thru table header rows
-			foreach($this->table['thead'] as $row) {
+			foreach($this->thead as $row) {
 				// begin table row
 				$string .= '<tr';
 
+				// @TODO finish
 				// add attributes if present
-				if(!empty($row['attr'])) {
-					$string .= $this->createAttributes($row['attr']);
-				}
+				// if(!empty($row['attr'])) {
+				// 	$string .= $this->createAttributes($row['attr']);
+				// }
+
+				$string .= $this->createAttributes($this->theadattr);
 
 				$string .= '>';
 
@@ -287,14 +385,16 @@ class Table {
 		$string .= '<tbody>' . PHP_EOL;
 
 		// step thru table body rows
-		foreach($this->table['tbody'] as $row) {
+		foreach($this->tbody as $row) {
 			// begin table row
 			$string .= '<tr';
 
+			$string .= $this->createAttributes($row);
+
 			// add attributes if present
-			if(!empty($row['attr'])) {
-				$string .= $this->createAttributes($row['attr']);
-			}
+			// if(!empty($row['attr'])) {
+			// 	$string .= $this->createAttributes($row['attr']);
+			// }
 
 			$string .= '>';
 
