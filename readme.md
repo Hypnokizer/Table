@@ -2,6 +2,7 @@
 
 This class exists to quickly build HTML tables using all components, including headers, footers, captions, and attributes.
 
+## requires PHP 8.3+
 
 ## Basic Use
 

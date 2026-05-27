@@ -10,10 +10,6 @@
 * @revision 2015-01-20 The entire class was rewritten to put all values into one TABLE array. Multiple header and footer rows are now possible.
 */
 
-/*
-@TODO single method attr() returns array and stores it in the appropriate place
-
-*/
 
 namespace App\Controllers;
 
@@ -29,20 +25,21 @@ class Table {
 	*/
 	protected $rowcounter;
 	protected $cellcounter;
-	protected $section;
+    protected $element; // table, row, or cell
+	protected $section; // thead, tbody, or tfoot
 	protected $caption;
+    protected $table;
 	protected $thead;
-	protected $tfoot;
 	protected $tbody;
+	protected $tfoot;
 
 
 	/**
-	* An array holding table attributes and values
+	* An array holding table attributes
 	*
 	* @access protected
 	* @var array
 	*/
-	protected $table;
 
 
 
@@ -72,30 +69,21 @@ class Table {
 	* @access public
 	* @param string The class name for the form
 	*/
-	public function __CONSTRUCT($classname = NULL) {
+	public function __CONSTRUCT($class = NULL) {
 		$this->rowcounter = 0;
 		$this->cellcounter = 0;
+        $this->element = 'table';
 		$this->section = 'tbody';
 
 		$this->caption = NULL;
 
 		$this->table = array(
-			'class' => $classname
+			'class' => $class
 		);
 
 		$this->thead = array();
-		$this->tfoot = array();
 		$this->tbody = array();
-	}
-
-
-
-
-	public function tableAttr($key, $val) {
-
-		$this->table[$key] = $val;
-
-        return $this;
+		$this->tfoot = array();
 	}
 
 
@@ -134,42 +122,23 @@ class Table {
 	* @see addFooterRow()
 	*/
 	public function row($section = 'tbody') {
+        // set the current element 
+        $this->element = 'row';
+
 		// reset the cell counter
 		$this->cellcounter = 0;
 
 		// increment the row counter
-		$this->rowcounter++;
+		$this->rowcounter++; 
 
 		// define allowed values for the table sections
-		$allowed = array('thead', 'tfoot', 'tbody');
+		$allowed = array('thead', 'tbody', 'tfoot');
 
 		if(in_array($section, $allowed)) {
 			$this->section = $section;
 		}
 		else {
 			$this->section = 'tbody';
-		}
-
-		return $this;
-	}
-
-
-
-
-
-	public function rowAttr($key, $val) {
-		switch($this->section) {
-			case 'thead':
-				$this->thead[$this->rowcounter]['attr'][$key] = $val;
-				break;
-
-			case 'tfoot':
-				$this->tfoot[$this->rowcounter]['attr'][$key] = $val;
-				break;
-
-			case 'tbody':
-				$this->tbody[$this->rowcounter]['attr'][$key] = $val;
-				break;
 		}
 
 		return $this;
@@ -193,6 +162,9 @@ class Table {
 	*/
 
 	public function cell($content = '&nbsp;') {
+        // set the current element 
+        $this->element = 'cell';
+
 		// increment the cell counter
 		$this->cellcounter++;
 
@@ -201,12 +173,12 @@ class Table {
 				$this->thead[$this->rowcounter][$this->cellcounter]['content'] = $content;
 				break;
 
-			case 'tfoot':
-				$this->tfoot[$this->rowcounter][$this->cellcounter]['content'] = $content;
-				break;
-
 			case 'tbody':
 				$this->tbody[$this->rowcounter][$this->cellcounter]['content'] = $content;
+				break;
+
+			case 'tfoot':
+				$this->tfoot[$this->rowcounter][$this->cellcounter]['content'] = $content;
 				break;
 		}
 
@@ -220,20 +192,43 @@ class Table {
 
 
 	public function attr($key, $val) {
+        switch($this->element) {
+            case 'table':
+                $this->table[$key] = $val;
+                break;
 
-		switch($this->section) {
-			case 'thead':
-				$this->thead[$this->rowcounter][$this->cellcounter][$key] = $val;
-				break;
+            case 'row':
+                switch($this->section) {
+                    case 'thead':
+                        $this->thead[$this->rowcounter]['attr'][$key] = $val;
+                        break;
 
-			case 'tfoot':
-				$this->tfoot[$this->rowcounter][$this->cellcounter][$key] = $val;
-				break;
+                    case 'tbody':
+                        $this->tbody[$this->rowcounter]['attr'][$key] = $val;
+                        break;
 
-			case 'tbody':
-				$this->tbody[$this->rowcounter][$this->cellcounter][$key] = $val;
-				break;
-		}
+                    case 'tfoot':
+                        $this->tfoot[$this->rowcounter]['attr'][$key] = $val;
+                        break;
+                }
+                break;
+
+            case 'cell':
+                switch($this->section) {
+                    case 'thead':
+                        $this->thead[$this->rowcounter][$this->cellcounter][$key] = $val;
+                        break;
+
+                    case 'tbody':
+                        $this->tbody[$this->rowcounter][$this->cellcounter][$key] = $val;
+                        break;
+
+                    case 'tfoot':
+                        $this->tfoot[$this->rowcounter][$this->cellcounter][$key] = $val;
+                        break;
+                }
+                break;
+        }
 
         return $this;
 	}
@@ -245,17 +240,25 @@ class Table {
 	/**
 	* create attributes from array of key value pairs
 	*/
-	// @TODO finish this
-	// @TODO account for boolean values
 	protected function createAttributes($array) {
 		$attr = array();
 
 		// create attribute array (except for content)
-		foreach($array as $key => $val) {
-			if($key != 'content') {
-				$attr[] = $key . '="' . $val . '"';
-			}
-		}
+        if(!empty($array)) {
+            foreach($array as $key => $val) {
+                if($key != 'content') {
+                    if(is_bool($val)) {
+                        if($val == true) {
+                            $attr[] = $key;
+                        }
+                    }
+                    else {
+                        $attr[] = $key . '="' . $val . '"';
+                    }	
+                }
+            }
+        }
+
 
 		// create string of attributes
 		$string = implode(' ', $attr);
@@ -288,7 +291,6 @@ class Table {
 	* @access public
 	* @return string
 	*/
-	// @TODO rework this
 	public function createTable($displaytable = true) {
 		// open the table tag
 		$string = '<table';
@@ -316,8 +318,10 @@ class Table {
 				// begin table row
 				$string .= '<tr';
 
-				$string .= $this->createAttributes($row['attr']);
-
+                if(array_key_exists('attr', $row)) {
+                    $string .= $this->createAttributes($row['attr']);
+                }
+				
 				$string .= '>';
 
 				foreach($row as $key => $val) {
@@ -349,8 +353,10 @@ class Table {
 			// begin table row
 			$string .= '<tr';
 
-			$string .= $this->createAttributes($row['attr']);
-
+            if(array_key_exists('attr', $row)) {
+                $string .= $this->createAttributes($row['attr']);
+            }
+			
 			$string .= '>';
 
 			foreach($row as $key => $val) {
@@ -384,8 +390,10 @@ class Table {
 				// begin table row
 				$string .= '<tr';
 
-				$string .= $this->createAttributes($row['attr']);
-
+                if(array_key_exists('attr', $row)) {
+                    $string .= $this->createAttributes($row['attr']);
+                }
+				
 				$string .= '>';
 
 				foreach($row as $key => $val) {
