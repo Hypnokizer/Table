@@ -1,0 +1,9 @@
+{
+    "name": "hypnokizer/table",
+    "description": "Class to build HTML tables",
+    "homepage": "https://github.com/Hypnokizer/Table",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.3.0"
+    }
+}
