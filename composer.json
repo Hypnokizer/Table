@@ -1,11 +1,9 @@
 {
     "name": "hypnokizer/table",
     "description": "Class to build HTML tables",
-    "type": "library",
-    "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Hypnokizer\\": "src"
+            "Hypnokizer\\": "src/"
         }
     },
     "authors": [
@@ -14,8 +12,5 @@
             "email": "hypnokizer@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
-    "require": {
-        "php": ">=8.3.0"
-    }
+    "require": {}
 }
