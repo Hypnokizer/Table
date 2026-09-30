@@ -1,6 +1,8 @@
 {
     "name": "hypnokizer/table",
     "description": "Class to build HTML tables",
+    "type": "libary",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Hypnokizer\\": "src/"
