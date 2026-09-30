@@ -3,7 +3,7 @@
     "description": "Class to build HTML tables",
     "autoload": {
         "psr-4": {
-            "Hypnokizer\\": "src/"
+            "Hypnokizer\\Table\\": "src/"
         }
     },
     "authors": [
@@ -12,5 +12,7 @@
             "email": "hypnokizer@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=8.1"
+    }
 }
