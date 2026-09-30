@@ -86,7 +86,7 @@ class Table {
      * @param string $class String of class names for the table.
      * @return object
      */
-	public function __CONSTRUCT(string $class = NULL) {
+	public function __CONSTRUCT(string|null $class = NULL) {
 		$this->rowcounter = 0;
 		$this->cellcounter = 0;
         $this->element = 'table';
