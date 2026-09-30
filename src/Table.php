@@ -6,7 +6,7 @@
  * This class constructs an object arry of attributes and values for the table. Once the attributes and values have all been added, a single method is called to create the table code. The HTML can be stored in a variable or directly displayed to the screen.
  * 
  * @author Nathan Kizer <hypnokizer@gmail.com>
- * @version 7.0
+ * @version 7.0.0
  * @revision 2026-05-25 Added ability to chain methods. Simplified user interface.
  */
 
