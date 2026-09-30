@@ -3,7 +3,7 @@
     "description": "Class to build HTML tables",
     "autoload": {
         "psr-4": {
-            "Hypnokizer\\Table\\": "src/"
+            "Hypnokizer\\": "src/"
         }
     },
     "authors": [
